@@ -1,0 +1,13 @@
+{
+  "_readme": "Copy this file to accounts.json and fill only the accounts you use. Keep accounts.json private: anyone with your USB drive can read it. Prefer app passwords and narrowly scoped tokens, and revoke them if the drive is lost.",
+
+  "mastodon":  { "enabled": false, "instance": "https://mastodon.social", "access_token": "" },
+  "bluesky":   { "enabled": false, "handle": "you.bsky.social", "app_password": "", "service": "https://bsky.social" },
+  "x":         { "enabled": false, "consumer_key": "", "consumer_secret": "", "access_token": "", "access_token_secret": "" },
+  "linkedin":  { "enabled": false, "access_token": "", "author_urn": "urn:li:person:XXXX", "api_version": "202510" },
+  "facebook":  { "enabled": false, "page_id": "", "page_access_token": "", "graph_version": "v21.0" },
+  "telegram":  { "enabled": false, "bot_token": "", "chat_id": "@yourchannel" },
+  "discord":   { "enabled": false, "webhook_url": "" },
+  "webhook":   { "enabled": false, "url": "", "secret_header": "", "secret_value": "",
+                 "_note": "Send approved posts to Make, Zapier, n8n, IFTTT or Buffer to reach Instagram, TikTok, Pinterest, YouTube, Threads and anything else." }
+}

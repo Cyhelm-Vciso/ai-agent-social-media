@@ -1,0 +1,320 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>SocialAgent</title>
+<style>
+:root{--bg:#f6f7f9;--panel:#fff;--text:#1d2330;--muted:#5d6675;--line:#dfe3e8;--accent:#3b5bdb;--accent-ink:#fff;--ok:#2b8a3e;--warn:#b35c00;--bad:#c92a2a;--chip:#eef1f6}
+@media (prefers-color-scheme:dark){:root{--bg:#12151b;--panel:#1a1f27;--text:#e6e9ee;--muted:#9aa3b2;--line:#2b323d;--accent:#748ffc;--accent-ink:#0f1320;--ok:#69db7c;--warn:#ffa94d;--bad:#ff8787;--chip:#232a35}}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--text);font:15px/1.5 system-ui,-apple-system,"Segoe UI",Roboto,sans-serif}
+header{display:flex;align-items:center;gap:12px;padding:12px 16px;border-bottom:1px solid var(--line);background:var(--panel);position:sticky;top:0;z-index:2;flex-wrap:wrap}
+header h1{font-size:17px;margin:0;font-weight:650}
+.status{font-size:13px;color:var(--muted);display:flex;gap:10px;align-items:center;margin-left:auto}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;background:var(--muted)}
+.dot.ok{background:var(--ok)}.dot.warn{background:var(--warn)}.dot.bad{background:var(--bad)}
+nav{display:flex;gap:4px;padding:8px 16px;overflow-x:auto;border-bottom:1px solid var(--line);background:var(--panel)}
+nav button{background:none;border:0;color:var(--muted);padding:8px 12px;border-radius:8px;cursor:pointer;font:inherit;white-space:nowrap}
+nav button.on{background:var(--chip);color:var(--text);font-weight:600}
+main{max-width:980px;margin:0 auto;padding:16px}
+section{display:none}section.on{display:block}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:12px;padding:16px;margin-bottom:14px}
+label{display:block;font-size:13px;color:var(--muted);margin:10px 0 4px}
+input,textarea,select{width:100%;padding:9px 10px;border:1px solid var(--line);border-radius:8px;background:var(--bg);color:var(--text);font:inherit}
+textarea{min-height:90px;resize:vertical}
+.row{display:flex;gap:10px;flex-wrap:wrap;align-items:center}
+.row>*{flex:1 1 180px}
+button.primary,button.btn{border:1px solid var(--line);background:var(--panel);color:var(--text);padding:8px 14px;border-radius:8px;cursor:pointer;font:inherit}
+button.primary{background:var(--accent);color:var(--accent-ink);border-color:var(--accent);font-weight:600}
+button:disabled{opacity:.55;cursor:wait}
+.chips{display:flex;flex-wrap:wrap;gap:6px;margin-top:4px}
+.chip{display:inline-flex;align-items:center;gap:6px;background:var(--chip);border:1px solid var(--line);border-radius:999px;padding:4px 10px;font-size:13px;cursor:pointer;user-select:none}
+.chip input{width:auto;margin:0}
+.muted{color:var(--muted);font-size:13px}
+.out{white-space:pre-wrap;word-wrap:break-word}
+.msgs{display:flex;flex-direction:column;gap:10px;margin-bottom:12px;max-height:60vh;overflow-y:auto}
+.msg{padding:10px 12px;border-radius:10px;max-width:90%;white-space:pre-wrap;word-wrap:break-word}
+.msg.user{align-self:flex-end;background:var(--accent);color:var(--accent-ink)}
+.msg.assistant{align-self:flex-start;background:var(--chip)}
+.msg.tool{align-self:flex-start;font-size:12px;color:var(--muted);background:none;padding:0 4px}
+.dcard{border:1px solid var(--line);border-radius:10px;padding:12px;margin-bottom:10px;background:var(--panel)}
+.dcard textarea{min-height:110px}
+.dcard .meta{display:flex;gap:8px;align-items:center;flex-wrap:wrap;font-size:13px;color:var(--muted);margin-bottom:6px}
+.badge{padding:1px 8px;border-radius:999px;font-size:12px;border:1px solid var(--line);background:var(--chip);color:var(--text)}
+.badge.approved{border-color:var(--accent)}.badge.published{border-color:var(--ok);color:var(--ok)}.badge.failed{border-color:var(--bad);color:var(--bad)}
+.over{color:var(--bad);font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:14px}td,th{border-bottom:1px solid var(--line);padding:6px;text-align:left;vertical-align:top}
+.toast{position:fixed;bottom:16px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);padding:10px 16px;border-radius:10px;font-size:14px;display:none;max-width:90vw;z-index:9}
+.spin{display:inline-block;width:14px;height:14px;border:2px solid var(--line);border-top-color:var(--accent);border-radius:50%;animation:s 0.8s linear infinite;vertical-align:-2px}
+@keyframes s{to{transform:rotate(360deg)}}
+a{color:var(--accent)}
+</style>
+</head>
+<body>
+<header>
+  <h1>SocialAgent</h1><span class="muted">local AI social media manager · Qwen2.5-7B</span>
+  <div class="status"><span id="llmDot" class="dot"></span><span id="llmText">checking model…</span><span id="dryText"></span></div>
+</header>
+<nav id="nav">
+  <button data-tab="chat" class="on">Agent</button>
+  <button data-tab="create">Create</button>
+  <button data-tab="research">Research</button>
+  <button data-tab="calendar">Calendar</button>
+  <button data-tab="drafts">Drafts <span id="draftCount"></span></button>
+  <button data-tab="engage">Engage</button>
+  <button data-tab="brand">Brand &amp; accounts</button>
+</nav>
+<main>
+
+<section id="chat" class="on">
+  <div class="card">
+    <div id="msgs" class="msgs"><div class="msg assistant">Hi! I'm your social media manager. Ask me to research a topic, plan a week of content, or write posts for any platform. I'll save posts as drafts for you to approve.</div></div>
+    <div class="row"><textarea id="chatIn" placeholder="e.g. Research what's new in electric bikes this month, then write a LinkedIn post and an X post about it and save them as drafts." style="min-height:70px"></textarea></div>
+    <div class="row" style="margin-top:8px"><button class="primary" id="chatSend" style="flex:0 0 auto">Send</button><button class="btn" id="chatClear" style="flex:0 0 auto">New chat</button><span class="muted">A 7B model on a CPU can take 30–120 seconds per answer.</span></div>
+  </div>
+</section>
+
+<section id="create">
+  <div class="card">
+    <label>What should the post say? (brief, key message, offer, link)</label>
+    <textarea id="brief" placeholder="Announce our new weekend workshop on budgeting for freelancers, 12 seats, link: https://example.com/workshop"></textarea>
+    <label>Platforms</label><div id="platPick" class="chips"></div>
+    <div class="row">
+      <div><label>Tone (optional)</label><input id="tone" placeholder="playful, bold, empathetic…"></div>
+      <div><label>Schedule for (optional)</label><input id="sched" type="datetime-local"></div>
+    </div>
+    <label class="chip" style="margin-top:10px;display:inline-flex"><input type="checkbox" id="withResearch"> Research the web first and use sources</label>
+    <div class="row" style="margin-top:12px"><button class="primary" id="writeBtn" style="flex:0 0 auto">Write drafts</button></div>
+  </div>
+  <div class="card">
+    <label>Repurpose an article URL or pasted text into posts for the platforms selected above</label>
+    <textarea id="repSrc" placeholder="https://yourblog.com/post  — or paste text"></textarea>
+    <div class="row" style="margin-top:10px"><button class="primary" id="repBtn" style="flex:0 0 auto">Repurpose</button></div>
+  </div>
+  <div id="createOut"></div>
+</section>
+
+<section id="research">
+  <div class="card">
+    <label>Topic or question</label>
+    <input id="resTopic" placeholder="e.g. latest trends in sustainable fashion 2026">
+    <div class="row" style="margin-top:10px"><button class="primary" id="resBtn" style="flex:0 0 auto">Research</button><span class="muted">Searches the web, reads the top pages, and writes a sourced brief.</span></div>
+  </div>
+  <div class="card" id="resOutCard" style="display:none"><div id="resOut" class="out"></div><div id="resSrc" class="muted" style="margin-top:10px"></div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="resToBrief" style="flex:0 0 auto">Use as brief in Create</button></div></div>
+</section>
+
+<section id="calendar">
+  <div class="card">
+    <div class="row">
+      <div style="flex:3 1 260px"><label>Theme or goal</label><input id="calTheme" placeholder="Launch of our spring collection; grow newsletter sign-ups"></div>
+      <div><label>Days</label><input id="calDays" type="number" min="1" max="31" value="7"></div>
+    </div>
+    <label>Platforms</label><div id="calPick" class="chips"></div>
+    <label class="chip" style="margin-top:10px;display:inline-flex"><input type="checkbox" id="calWrite"> Also write every post as a draft (slower)</label>
+    <div class="row" style="margin-top:12px"><button class="primary" id="calBtn" style="flex:0 0 auto">Plan calendar</button></div>
+  </div>
+  <div class="card" id="calOutCard" style="display:none"><table id="calTable"></table></div>
+</section>
+
+<section id="drafts">
+  <div class="card"><div class="row">
+    <select id="draftFilter" style="flex:0 1 200px"><option value="">All</option><option>draft</option><option>approved</option><option>published</option><option>failed</option><option>rejected</option></select>
+    <button class="btn" id="draftReload" style="flex:0 0 auto">Refresh</button>
+    <a href="/api/export.csv" class="btn" style="flex:0 0 auto;text-decoration:none;padding:8px 14px;border:1px solid var(--line);border-radius:8px">Export CSV</a>
+    <span class="muted">Approve a draft before publishing. Nothing posts without you.</span>
+  </div></div>
+  <div id="draftList"></div>
+</section>
+
+<section id="engage">
+  <div class="card">
+    <div class="row"><div style="flex:0 1 200px"><label>Platform</label><select id="engPlat"></select></div></div>
+    <label>Our post</label><textarea id="engPost"></textarea>
+    <label>Comment or DM to reply to</label><textarea id="engComment"></textarea>
+    <div class="row" style="margin-top:10px"><button class="primary" id="engBtn" style="flex:0 0 auto">Suggest replies</button></div>
+  </div>
+  <div class="card">
+    <label>Hashtag ideas for a topic</label>
+    <div class="row"><input id="tagTopic" placeholder="home coffee roasting"><button class="btn" id="tagBtn" style="flex:0 0 auto">Suggest hashtags</button></div>
+  </div>
+  <div class="card" id="engOutCard" style="display:none"><div id="engOut" class="out"></div></div>
+</section>
+
+<section id="brand">
+  <div class="card">
+    <p class="muted" style="margin-top:0">The agent writes in this voice for every post. Saved to <code>config/brand.json</code> on the drive.</p>
+    <div class="row"><div><label>Brand name</label><input id="bName"></div><div><label>Website</label><input id="bWeb"></div></div>
+    <label>One-liner</label><input id="bOne">
+    <label>Audience</label><textarea id="bAud" style="min-height:60px"></textarea>
+    <label>Voice</label><textarea id="bVoice" style="min-height:60px"></textarea>
+    <div class="row"><div><label>Emoji use</label><select id="bEmoji"><option>none</option><option>light</option><option>moderate</option><option>heavy</option></select></div><div><label>Language</label><input id="bLang"></div></div>
+    <label>Always (one per line)</label><textarea id="bAlways" style="min-height:60px"></textarea>
+    <label>Never (one per line)</label><textarea id="bNever" style="min-height:60px"></textarea>
+    <label>Brand hashtags (space-separated)</label><input id="bTags">
+    <div class="row" style="margin-top:12px"><button class="primary" id="brandSave" style="flex:0 0 auto">Save brand</button></div>
+  </div>
+  <div class="card"><h3 style="margin-top:0;font-size:15px">Publishing routes</h3>
+    <p class="muted">Configure accounts in <code>config/accounts.json</code> (copy from <code>accounts.example.json</code>), then restart. <b>manual</b> = copy the text or open the platform's post box; <b>webhook</b> = sent to Make/Zapier/n8n/Buffer.</p>
+    <table id="routes"></table></div>
+</section>
+</main>
+<div id="toast" class="toast"></div>
+
+<script>
+const $ = s => document.querySelector(s);
+const el = (tag, props = {}, ...kids) => { const e = document.createElement(tag); Object.assign(e, props); kids.forEach(k => e.append(k)); return e; };
+let CFG = {platforms:{}}; let chatHistory = [];
+
+async function api(path, body, method) {
+  const opts = {method: method || (body ? 'POST' : 'GET'), headers: {'X-Requested-With': 'SocialAgent'}};
+  if (body) { opts.headers['Content-Type'] = 'application/json'; opts.body = JSON.stringify(body); }
+  const r = await fetch(path, opts); const data = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(data.error || ('HTTP ' + r.status));
+  return data;
+}
+function toast(msg, ms = 3500) { const t = $('#toast'); t.textContent = msg; t.style.display = 'block'; clearTimeout(t._h); t._h = setTimeout(() => t.style.display = 'none', ms); }
+async function busy(btn, fn) {
+  const label = btn.textContent; btn.disabled = true; btn.replaceChildren(el('span', {className: 'spin'}), ' Working…');
+  try { return await fn(); } catch (e) { toast(e.message, 7000); } finally { btn.disabled = false; btn.textContent = label; }
+}
+
+// tabs
+document.querySelectorAll('#nav button').forEach(b => b.onclick = () => {
+  document.querySelectorAll('#nav button').forEach(x => x.classList.toggle('on', x === b));
+  document.querySelectorAll('section').forEach(s => s.classList.toggle('on', s.id === b.dataset.tab));
+  if (b.dataset.tab === 'drafts') loadDrafts();
+});
+
+// status
+async function status() {
+  try {
+    const s = await api('/api/status'); const d = $('#llmDot');
+    d.className = 'dot ' + (s.llm.ok ? 'ok' : (s.llm.status === 'loading' ? 'warn' : 'bad'));
+    $('#llmText').textContent = s.llm.ok ? 'model ready' : ('model ' + s.llm.status);
+    $('#dryText').textContent = s.dry_run ? '· dry run' : '· live posting';
+    $('#draftCount').textContent = s.counts.draft ? '(' + s.counts.draft + ')' : '';
+  } catch (e) { $('#llmDot').className = 'dot bad'; $('#llmText').textContent = 'agent offline'; }
+}
+setInterval(status, 8000);
+
+function chips(container, defaults) {
+  container.replaceChildren(...Object.entries(CFG.platforms).map(([k, v]) =>
+    el('label', {className: 'chip'}, el('input', {type: 'checkbox', value: k, checked: defaults.includes(k)}), v.name)));
+}
+const picked = c => [...c.querySelectorAll('input:checked')].map(i => i.value);
+
+async function loadConfig() {
+  CFG = await api('/api/config');
+  chips($('#platPick'), ['x', 'linkedin', 'instagram']); chips($('#calPick'), ['linkedin', 'instagram']);
+  $('#engPlat').replaceChildren(...Object.entries(CFG.platforms).map(([k, v]) => el('option', {value: k, textContent: v.name})));
+  const b = CFG.brand || {};
+  $('#bName').value = b.name || ''; $('#bWeb').value = b.website || ''; $('#bOne').value = b.one_liner || '';
+  $('#bAud').value = b.audience || ''; $('#bVoice').value = b.voice || ''; $('#bEmoji').value = b.emoji || 'light';
+  $('#bLang').value = b.language || 'English'; $('#bAlways').value = (b.always || []).join('\n');
+  $('#bNever').value = (b.never || []).join('\n'); $('#bTags').value = (b.default_hashtags || []).join(' ');
+  $('#routes').replaceChildren(el('tr', {}, el('th', {textContent: 'Platform'}), el('th', {textContent: 'Limit'}), el('th', {textContent: 'Route'})),
+    ...Object.values(CFG.platforms).map(p => el('tr', {}, el('td', {textContent: p.name}), el('td', {textContent: p.max_chars}), el('td', {textContent: p.route}))));
+}
+
+// chat
+function addMsg(role, text) { const m = el('div', {className: 'msg ' + role, textContent: text}); $('#msgs').append(m); $('#msgs').scrollTop = 1e9; return m; }
+$('#chatSend').onclick = () => busy($('#chatSend'), async () => {
+  const q = $('#chatIn').value.trim(); if (!q) return;
+  $('#chatIn').value = ''; addMsg('user', q); chatHistory.push({role: 'user', content: q});
+  const pending = addMsg('tool', 'thinking…');
+  try {
+    const r = await api('/api/chat', {history: chatHistory});
+    pending.remove();
+    (r.trace || []).forEach(t => addMsg('tool', '🔧 ' + t.tool + ' ' + JSON.stringify(t.args).slice(0, 120)));
+    addMsg('assistant', r.reply || '(no reply)'); chatHistory.push({role: 'assistant', content: r.reply || ''});
+    status();
+  } catch (e) { pending.remove(); chatHistory.pop(); throw e; }
+});
+$('#chatIn').addEventListener('keydown', e => { if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) $('#chatSend').click(); });
+$('#chatClear').onclick = () => { chatHistory = []; $('#msgs').replaceChildren(addMsg('assistant', 'New chat started.')); };
+
+// create
+function showDrafts(container, drafts, sources) {
+  container.replaceChildren(...drafts.map(d => draftCard(d)));
+  if (sources && sources.length) container.prepend(el('div', {className: 'card muted'}, 'Sources used: ', ...sources.map((s, i) => el('span', {}, ' [' + (i + 1) + '] ', el('a', {href: s.url, target: '_blank', rel: 'noopener', textContent: s.title || s.url})))));
+}
+$('#writeBtn').onclick = () => busy($('#writeBtn'), async () => {
+  const r = await api('/api/write', {brief: $('#brief').value, platforms: picked($('#platPick')), tone: $('#tone').value,
+    scheduled_for: $('#sched').value.replace('T', ' '), research: $('#withResearch').checked});
+  showDrafts($('#createOut'), r.drafts, r.sources); toast(r.drafts.length + ' drafts saved'); status();
+});
+$('#repBtn').onclick = () => busy($('#repBtn'), async () => {
+  const r = await api('/api/repurpose', {source: $('#repSrc').value, platforms: picked($('#platPick'))});
+  showDrafts($('#createOut'), r.drafts); toast(r.drafts.length + ' drafts saved'); status();
+});
+
+// research
+$('#resBtn').onclick = () => busy($('#resBtn'), async () => {
+  const r = await api('/api/research', {topic: $('#resTopic').value});
+  $('#resOutCard').style.display = 'block'; $('#resOut').textContent = r.summary;
+  $('#resSrc').replaceChildren('Sources: ', ...r.sources.map((s, i) => el('div', {}, '[' + (i + 1) + '] ', el('a', {href: s.url, target: '_blank', rel: 'noopener', textContent: s.title || s.url}))));
+});
+$('#resToBrief').onclick = () => { $('#brief').value = $('#resTopic').value + '\n\nResearch notes:\n' + $('#resOut').textContent; document.querySelector('[data-tab=create]').click(); };
+
+// calendar
+$('#calBtn').onclick = () => busy($('#calBtn'), async () => {
+  const r = await api('/api/calendar', {theme: $('#calTheme').value, days: +$('#calDays').value, platforms: picked($('#calPick')), write: $('#calWrite').checked});
+  $('#calOutCard').style.display = 'block';
+  $('#calTable').replaceChildren(el('tr', {}, ...['Date', 'Platform', 'Pillar', 'Format', 'Idea'].map(h => el('th', {textContent: h}))),
+    ...r.items.map(it => el('tr', {}, ...[it.date, it.platform, it.pillar, it.format, it.idea].map(v => el('td', {textContent: v})))));
+  if (r.drafts.length) toast(r.drafts.length + ' drafts saved'); status();
+});
+
+// drafts
+function count(text, platform) { return platform === 'x' ? text.replace(/https?:\/\/\S+/g, 'x'.repeat(23)).length : text.length; }
+function draftCard(d) {
+  const p = CFG.platforms[d.platform] || {name: d.platform, max_chars: 99999};
+  const ta = el('textarea', {value: d.text});
+  const counter = el('span');
+  const upd = () => { const n = count(ta.value, d.platform); counter.textContent = n + ' / ' + p.max_chars; counter.className = n > p.max_chars ? 'over' : ''; };
+  ta.oninput = upd; upd();
+  const sched = el('input', {value: d.scheduled_for || '', placeholder: 'schedule (optional)', style: 'flex:0 1 180px'});
+  const save = async (fields) => { const r = await api('/api/drafts/' + d.id, {text: ta.value, scheduled_for: sched.value, ...fields}); card.replaceWith(draftCard(r)); status(); return r; };
+  const btn = (label, fn, cls = 'btn') => { const b = el('button', {className: cls, textContent: label, style: 'flex:0 0 auto'}); b.onclick = () => busy(b, fn); return b; };
+  const actions = el('div', {className: 'row', style: 'margin-top:8px'},
+    btn('Save', () => save({}).then(() => toast('Saved'))),
+    d.status !== 'approved' && d.status !== 'published' ? btn('Approve', () => save({status: 'approved'}), 'primary') : '',
+    d.status === 'approved' ? btn('Publish', async () => {
+      await save({}); const r = await api('/api/drafts/' + d.id + '/publish', {});
+      if (r.result.compose_url) window.open(r.result.compose_url, '_blank', 'noopener');
+      toast(r.result.message || ('Posted via ' + r.result.route)); card.replaceWith(draftCard(r.draft)); status();
+    }, 'primary') : '',
+    btn('Copy', async () => { await navigator.clipboard.writeText(ta.value); toast('Copied'); }),
+    p.compose_url ? btn('Open in ' + p.name, async () => { const r = await api('/api/drafts/' + d.id + '/compose'); if (r.url) window.open(r.url, '_blank', 'noopener'); }) : '',
+    d.status !== 'published' ? btn('Mark posted', () => save({status: 'published'})) : '',
+    btn('Delete', async () => { if (confirm('Delete this draft?')) { await api('/api/drafts/' + d.id, null, 'DELETE'); card.remove(); status(); } }));
+  const card = el('div', {className: 'dcard'},
+    el('div', {className: 'meta'}, el('b', {textContent: '#' + d.id + ' ' + p.name}), el('span', {className: 'badge ' + d.status, textContent: d.status}), counter, sched),
+    ta, d.result ? el('div', {className: 'muted out', textContent: 'Result: ' + d.result}) : '', actions);
+  return card;
+}
+async function loadDrafts() {
+  const r = await api('/api/drafts' + ($('#draftFilter').value ? '?status=' + $('#draftFilter').value : ''));
+  $('#draftList').replaceChildren(...(r.drafts.length ? r.drafts.map(draftCard) : [el('div', {className: 'card muted', textContent: 'No drafts yet. Create some in the Agent or Create tab.'})]));
+}
+$('#draftReload').onclick = loadDrafts; $('#draftFilter').onchange = loadDrafts;
+
+// engage
+$('#engBtn').onclick = () => busy($('#engBtn'), async () => { const r = await api('/api/reply', {platform: $('#engPlat').value, post: $('#engPost').value, comment: $('#engComment').value}); $('#engOutCard').style.display = 'block'; $('#engOut').textContent = r.text; });
+$('#tagBtn').onclick = () => busy($('#tagBtn'), async () => { const r = await api('/api/hashtags', {topic: $('#tagTopic').value, platform: $('#engPlat').value}); $('#engOutCard').style.display = 'block'; $('#engOut').textContent = r.text; });
+
+// brand
+$('#brandSave').onclick = () => busy($('#brandSave'), async () => {
+  const lines = v => v.split('\n').map(s => s.trim()).filter(Boolean);
+  await api('/api/brand', {name: $('#bName').value, website: $('#bWeb').value, one_liner: $('#bOne').value, audience: $('#bAud').value,
+    voice: $('#bVoice').value, emoji: $('#bEmoji').value, language: $('#bLang').value, always: lines($('#bAlways').value),
+    never: lines($('#bNever').value), default_hashtags: $('#bTags').value.split(/\s+/).filter(Boolean)});
+  toast('Brand saved');
+});
+
+loadConfig().then(status).catch(e => toast(e.message, 8000));
+</script>
+</body>
+</html>

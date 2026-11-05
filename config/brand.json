@@ -1,0 +1,20 @@
+{
+  "name": "Your Brand",
+  "one_liner": "What you do, for whom, in one sentence.",
+  "audience": "Who you are talking to (role, industry, pains, goals).",
+  "voice": "Friendly, confident, practical. Short sentences. No jargon.",
+  "emoji": "light",
+  "always": [
+    "Lead with a hook in the first line",
+    "One clear idea per post",
+    "End with a question or a call to action"
+  ],
+  "never": [
+    "Make claims we cannot back up",
+    "Use more than the platform's recommended hashtags",
+    "Mention competitors by name"
+  ],
+  "default_hashtags": ["#YourBrand"],
+  "website": "https://example.com",
+  "language": "English"
+}

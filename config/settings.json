@@ -1,0 +1,15 @@
+{
+  "llm_url": "http://127.0.0.1:8034",
+  "llm_temperature": 0.7,
+  "llm_timeout_seconds": 900,
+  "ui_host": "127.0.0.1",
+  "ui_port": 8035,
+  "dry_run": true,
+  "max_agent_steps": 6,
+  "search": {
+    "provider": "duckduckgo",
+    "searxng_url": "",
+    "max_results": 6
+  },
+  "fetch_max_chars": 6000
+}

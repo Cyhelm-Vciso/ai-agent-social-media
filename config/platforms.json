@@ -1,0 +1,73 @@
+{
+  "_readme": "Platform rules used when writing posts. Limits change: edit this file instead of the code. compose_url opens the platform's own post box with the text filled in ({text} and {title} are URL-encoded).",
+  "x": {
+    "name": "X (Twitter)", "max_chars": 280, "hashtags": "0-2",
+    "style": "Punchy, conversational, one idea. Strong first line. Links count as 23 characters.",
+    "compose_url": "https://x.com/intent/post?text={text}", "publisher": "x"
+  },
+  "linkedin": {
+    "name": "LinkedIn", "max_chars": 3000, "hashtags": "3-5",
+    "style": "Professional but human. Hook in the first two lines (shown before 'see more'), short paragraphs, a lesson or insight, end with a question.",
+    "compose_url": "https://www.linkedin.com/feed/?shareActive=true&text={text}", "publisher": "linkedin"
+  },
+  "facebook": {
+    "name": "Facebook", "max_chars": 2000, "hashtags": "0-3",
+    "style": "Warm and community-focused. Short, easy to read on mobile. Invite comments.",
+    "compose_url": "", "publisher": "facebook"
+  },
+  "instagram": {
+    "name": "Instagram", "max_chars": 2200, "hashtags": "3-5",
+    "style": "Caption for an image or reel. Hook first, story or value, clear CTA. Suggest the visual in one line starting 'Visual:'.",
+    "compose_url": "", "publisher": "webhook"
+  },
+  "threads": {
+    "name": "Threads", "max_chars": 500, "hashtags": "0-1",
+    "style": "Casual, conversational, opinionated. Invite replies.",
+    "compose_url": "https://www.threads.net/intent/post?text={text}", "publisher": "webhook"
+  },
+  "bluesky": {
+    "name": "Bluesky", "max_chars": 300, "hashtags": "0-2",
+    "style": "Friendly, authentic, a little nerdy. No hard selling.",
+    "compose_url": "https://bsky.app/intent/compose?text={text}", "publisher": "bluesky"
+  },
+  "mastodon": {
+    "name": "Mastodon", "max_chars": 500, "hashtags": "1-3",
+    "style": "Community-minded, no marketing speak. Use CamelCase hashtags for accessibility.",
+    "compose_url": "", "publisher": "mastodon"
+  },
+  "tiktok": {
+    "name": "TikTok", "max_chars": 2200, "hashtags": "3-5",
+    "style": "Write a 30-45 second video script: HOOK (first 2 seconds), 3 quick beats, CTA. Then a one-line caption with hashtags.",
+    "compose_url": "", "publisher": "webhook"
+  },
+  "youtube": {
+    "name": "YouTube", "max_chars": 5000, "hashtags": "2-3",
+    "style": "Title (under 70 characters) on the first line, then a description with a summary, key points, and a CTA.",
+    "compose_url": "", "publisher": "webhook"
+  },
+  "pinterest": {
+    "name": "Pinterest", "max_chars": 500, "hashtags": "0-2",
+    "style": "Searchable, keyword-rich pin description. Title on the first line.",
+    "compose_url": "", "publisher": "webhook"
+  },
+  "reddit": {
+    "name": "Reddit", "max_chars": 3000, "hashtags": "0",
+    "style": "Title on the first line. Genuinely useful, no marketing tone, follow subreddit rules, disclose affiliation.",
+    "compose_url": "https://www.reddit.com/submit?title={title}&selftext=true&text={text}", "publisher": "manual"
+  },
+  "telegram": {
+    "name": "Telegram", "max_chars": 4096, "hashtags": "0-2",
+    "style": "Channel update: clear headline, short body, link.",
+    "compose_url": "https://t.me/share/url?url=&text={text}", "publisher": "telegram"
+  },
+  "discord": {
+    "name": "Discord", "max_chars": 2000, "hashtags": "0",
+    "style": "Community announcement. Friendly, scannable, use line breaks.",
+    "compose_url": "", "publisher": "discord"
+  },
+  "whatsapp": {
+    "name": "WhatsApp", "max_chars": 1000, "hashtags": "0",
+    "style": "Short broadcast message, personal tone.",
+    "compose_url": "https://wa.me/?text={text}", "publisher": "manual"
+  }
+}

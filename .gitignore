@@ -1,0 +1,15 @@
+# secrets
+config/accounts.json
+.env
+
+# large / local files
+models/*
+!models/README.md
+runtime/
+bin/
+data/*
+!data/README.md
+logs/
+
+__pycache__/
+*.pyc
